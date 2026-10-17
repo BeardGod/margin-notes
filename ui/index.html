@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Margin</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="sidebar" id="sidebar" aria-label="Folders">
+      <div class="sidebar-scroll">
+        <div class="section-title">On My PC</div>
+        <ul class="folder-list" id="folder-list" role="listbox"></ul>
+        <div class="section-title tags-title" id="tags-title" hidden>Tags</div>
+        <div class="tag-grid" id="tag-grid"></div>
+      </div>
+      <button class="new-folder" id="new-folder" title="New Folder (Ctrl+Shift+N)">
+        <span class="icon" data-icon="plusCircle"></span><span>New Folder</span>
+      </button>
+    </aside>
+
+    <section class="list-pane" id="list-pane" aria-label="Notes">
+      <header class="toolbar list-toolbar">
+        <div class="segmented" role="group" aria-label="View">
+          <button id="view-list" class="seg active" title="View as List" data-icon="list"></button>
+          <button id="view-gallery" class="seg" title="View as Gallery" data-icon="grid"></button>
+        </div>
+        <button id="delete-note" class="tool" title="Delete" data-icon="trash"></button>
+      </header>
+      <div class="list-heading" id="list-heading"></div>
+      <div class="note-list" id="note-list" tabindex="0" role="listbox"></div>
+    </section>
+
+    <main class="editor-pane" id="editor-pane">
+      <header class="toolbar editor-toolbar">
+        <button id="compose" class="tool" title="New Note (Ctrl+N)" data-icon="compose"></button>
+        <span class="divider"></span>
+        <button id="format" class="tool" title="Text Styles" data-icon="format"></button>
+        <button id="checklist" class="tool" title="Checklist (Ctrl+Shift+L)" data-icon="checklist"></button>
+        <button id="table" class="tool" title="Table (Ctrl+Alt+T)" data-icon="table"></button>
+        <span class="spacer"></span>
+        <button id="pin" class="tool" title="Pin Note" data-icon="pin"></button>
+        <label class="search">
+          <span class="icon" data-icon="search"></span>
+          <input id="search" type="search" placeholder="Search" spellcheck="false" autocomplete="off">
+        </label>
+      </header>
+      <div class="editor-scroll" id="editor-scroll">
+        <div class="note-date" id="note-date"></div>
+        <div class="editor" id="editor" contenteditable="true" spellcheck="true" aria-label="Note"></div>
+        <div class="empty-editor" id="empty-editor">No note selected</div>
+        <div class="trash-banner" id="trash-banner" hidden>
+          This note is in Recently Deleted. <button id="restore-note" class="link">Recover</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="popover" id="format-popover" hidden role="menu">
+    <button data-block="h1" class="fmt-title">Title</button>
+    <button data-block="h2" class="fmt-heading">Heading</button>
+    <button data-block="h3" class="fmt-subheading">Subheading</button>
+    <button data-block="p" class="fmt-body">Body</button>
+    <button data-block="pre" class="fmt-mono">Monospaced</button>
+    <hr>
+    <button data-list="bullet">•&nbsp; Bulleted List</button>
+    <button data-list="dash">–&nbsp; Dashed List</button>
+    <button data-list="number">1.&nbsp; Numbered List</button>
+    <hr>
+    <div class="inline-styles">
+      <button data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+      <button data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+      <button data-cmd="underline" title="Underline (Ctrl+U)"><u>U</u></button>
+      <button data-cmd="strikeThrough" title="Strikethrough"><s>S</s></button>
+    </div>
+  </div>
+
+  <div class="menu" id="context-menu" hidden role="menu"></div>
+</body>
+</html>

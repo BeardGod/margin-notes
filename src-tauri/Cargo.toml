@@ -1,0 +1,13 @@
+[package]
+name = "margin"
+version = "0.1.0"
+edition = "2021"
+description = "Margin notes for Windows"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+notes-core = { path = "../crates/notes-core" }
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }

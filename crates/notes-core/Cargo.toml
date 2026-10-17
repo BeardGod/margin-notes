@@ -1,0 +1,11 @@
+[package]
+name = "notes-core"
+version = "0.1.0"
+edition = "2021"
+description = "Storage and logic for Margin notes"
+
+[dependencies]
+rusqlite = { version = "0.40", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+uuid = { version = "1", features = ["v4"] }
+thiserror = "2"
