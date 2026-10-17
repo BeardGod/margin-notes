@@ -1,6 +1,6 @@
 # Margin
 
-A fast, local note-taking app for Windows, built with Tauri and SQLite. Its layout and behaviour follow the familiar three-pane notes design: folders on the left, a date-grouped note list in the middle, and a rich-text editor on the right.
+A fast, local note-taking app for Windows and Android, built with Tauri and SQLite. Its layout and behaviour follow the familiar three-pane notes design: folders on the left, a date-grouped note list in the middle, and a rich-text editor on the right.
 
 Margin is an independent project. It is not affiliated with or endorsed by Apple, and it contains no Apple code, icons or fonts.
 
@@ -56,6 +56,27 @@ npm run build               # installers in target/release/bundle/{nsis,msi}
 
 Opening `ui/index.html` through any local web server shows the interface with sample notes stored in the browser, which is handy for working on the design.
 
-## Windows builds
+## Builds
 
-Every push to `main` runs the tests and builds the Windows installers (`.exe` and `.msi`) in GitHub Actions. Download them from the run's **margin-windows-installers** artifact.
+Every push to `main` runs the tests and builds, in GitHub Actions:
+
+- **Windows** installers (`.exe` and `.msi`): the run's **margin-windows-installers** artifact.
+- **Android** APK for 64-bit ARM phones: the run's **margin-android-apk** artifact. Install it by opening the file on the phone and allowing installs from that app when Android asks.
+
+On phones the interface shows one pane at a time (folders, list, note) with back buttons; on wider screens such as an unfolded foldable, the list and note sit side by side and folders slide in from the left.
+
+### Android signing
+
+So that each new APK installs as an update (keeping your notes), add two repository secrets under **Settings → Secrets and variables → Actions**:
+
+- `ANDROID_KEYSTORE_BASE64`: a keystore file, base64-encoded
+- `ANDROID_KEYSTORE_PASSWORD`: its password
+
+Create one with:
+
+```bash
+keytool -genkeypair -keystore margin.jks -alias margin -keyalg RSA -keysize 2048 -validity 10000
+base64 -w0 margin.jks
+```
+
+Without the secrets, each build is signed with a throwaway key, and Android will refuse to install a new build over an old one; uninstalling first deletes the notes stored on the phone.

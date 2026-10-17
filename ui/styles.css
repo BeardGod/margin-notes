@@ -321,3 +321,72 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   .app { grid-template-columns: 180px 250px 1fr; }
   .search { width: 150px; }
 }
+
+/* ---------- dialog ---------- */
+.dialog-backdrop {
+  position: fixed; inset: 0; z-index: 30;
+  display: grid; place-items: center;
+  background: rgba(0, 0, 0, 0.28);
+}
+.dialog {
+  width: min(340px, calc(100vw - 48px));
+  background: var(--popover-bg); border-radius: 14px; box-shadow: var(--shadow);
+  padding: 20px 20px 14px; font-size: 14px;
+}
+.dialog p { margin: 0 0 18px; line-height: 1.45; }
+.dialog-buttons { display: flex; justify-content: flex-end; gap: 8px; }
+.dialog-buttons button { padding: 7px 16px; border-radius: 8px; font-weight: 600; background: var(--hover); }
+.dialog-buttons .danger { background: #d93c30; color: #fff; }
+
+/* ---------- smaller screens & touch ---------- */
+.back, .mobile-search { display: none !important; }
+.scrim { position: fixed; inset: 0; z-index: 19; background: rgba(0, 0, 0, 0.25); }
+.app { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); height: 100dvh; }
+
+/* Two panes: folders slide in over the list (e.g. a folding phone opened up). */
+@media (max-width: 999px) {
+  .app, .app.gallery { grid-template-columns: 280px 1fr; }
+  .app.gallery { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed; z-index: 20; top: 0; bottom: 0; left: 0; width: 270px;
+    padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
+    transform: translateX(-100%); transition: transform 0.2s ease, visibility 0.2s;
+    visibility: hidden;
+  }
+  .app.show-folders .sidebar { transform: none; visibility: visible; box-shadow: var(--shadow); }
+  #back-folders { display: grid !important; }
+  .list-toolbar { justify-content: flex-start; }
+  #delete-note { margin-left: auto; }
+}
+
+/* One pane at a time on phones. */
+@media (max-width: 699px) {
+  .app, .app.gallery, .app.gallery.editing { grid-template-columns: 1fr; }
+  .list-pane, .editor-pane { display: none !important; border: 0; }
+  .app[data-pane="list"] .list-pane { display: flex !important; }
+  .app[data-pane="editor"] .editor-pane { display: flex !important; }
+  .back, .mobile-search { display: flex !important; }
+  .back { place-items: center; }
+  .desktop-search { display: none !important; }
+  .mobile-search { width: auto; margin: 0 14px 8px; height: 36px; }
+  .list-heading { font-size: 28px; padding: 0 18px 8px; }
+  .editor { padding: 4px 18px 120px; }
+  .note-list.gallery { grid-template-columns: repeat(2, 1fr); padding: 4px 14px 20px; gap: 14px 12px; }
+}
+
+@media (pointer: coarse) {
+  .tool { width: 42px; height: 40px; }
+  .tool .svg-icon { width: 21px; height: 21px; }
+  .seg { width: 40px; height: 32px; }
+  .folder-row { height: 42px; font-size: 15px; }
+  .note-row { padding: 12px 14px; }
+  .note-title { font-size: 16px; }
+  .note-meta { font-size: 14px; }
+  .editor { font-size: 17px; }
+  .editor ul.checklist { padding-left: 34px; }
+  .editor ul.checklist > li::before { width: 22px; height: 22px; left: -33px; top: 1px; background-size: 22px; }
+  .tag-pill { padding: 6px 12px; font-size: 14px; }
+  .popover > button, .menu > button { padding: 10px 12px; font-size: 15px; }
+  .search input { font-size: 16px; }
+  body { -webkit-tap-highlight-color: transparent; }
+}

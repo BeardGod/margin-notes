@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 description = "Margin notes for Windows"
 
+[lib]
+name = "margin_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 

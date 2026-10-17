@@ -7,7 +7,8 @@ const els = {
   app: $('app'), folderList: $('folder-list'), tagGrid: $('tag-grid'), tagsTitle: $('tags-title'),
   noteList: $('note-list'), listHeading: $('list-heading'), editor: $('editor'), noteDate: $('note-date'),
   emptyEditor: $('empty-editor'), trashBanner: $('trash-banner'), search: $('search'),
-  formatPopover: $('format-popover'), menu: $('context-menu'),
+  formatPopover: $('format-popover'), menu: $('context-menu'), scrim: $('scrim'),
+  searchMobile: $('search-mobile'), dialog: $('dialog'),
 };
 
 const state = {
@@ -22,6 +23,40 @@ const state = {
 
 const DAY = 86400000;
 const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// ---------- layout ----------
+
+const phone = window.matchMedia('(max-width: 699px)');
+const compact = window.matchMedia('(max-width: 999px)');
+
+/** On phones one pane shows at a time: folders, list or editor. */
+function setPane(pane) {
+  els.app.dataset.pane = pane;
+  showFolders(pane === 'folders' && compact.matches);
+}
+
+function showFolders(open) {
+  els.app.classList.toggle('show-folders', open);
+  els.scrim.hidden = !open || !compact.matches;
+}
+
+/** In-app replacement for confirm(), which mobile web views don't all support. */
+function ask(text, okLabel = 'Delete') {
+  return new Promise((resolve) => {
+    $('dialog-text').textContent = text;
+    $('dialog-ok').textContent = okLabel;
+    els.dialog.hidden = false;
+    $('dialog-ok').focus();
+    const done = (answer) => {
+      els.dialog.hidden = true;
+      $('dialog-ok').onclick = $('dialog-cancel').onclick = els.dialog.onkeydown = null;
+      resolve(answer);
+    };
+    $('dialog-ok').onclick = () => done(true);
+    $('dialog-cancel').onclick = () => done(false);
+    els.dialog.onkeydown = (e) => { if (e.key === 'Escape') done(false); };
+  });
+}
 
 // ---------- dates ----------
 
@@ -109,8 +144,9 @@ async function setScope(scope) {
   await flushSave();
   state.scope = scope;
   state.query = '';
-  els.search.value = '';
+  els.search.value = els.searchMobile.value = '';
   renderSidebar();
+  setPane('list');
   await refreshList({ keepSelection: false });
 }
 
@@ -249,7 +285,8 @@ async function newNote() {
   state.selectedId = null;
   await selectNote(note.id);
   renderList();
-  if (state.view === 'gallery') els.app.classList.add('editing');
+  if (state.view === 'gallery' && !phone.matches) els.app.classList.add('editing');
+  setPane('editor');
   els.editor.innerHTML = '<h1><br></h1>';
   placeCaret(els.editor.firstChild);
   refreshSidebar();
@@ -404,7 +441,7 @@ async function trashNote(id = state.selectedId) {
   const idx = state.notes.findIndex((n) => n.id === id);
   const inTrash = state.notes[idx]?.deleted_at != null;
   if (inTrash) {
-    if (!confirm('Delete this note permanently? This can’t be undone.')) return;
+    if (!(await ask('Delete this note permanently? This can’t be undone.'))) return;
     await store.purgeNote(id);
   } else {
     await store.trashNote(id);
@@ -472,7 +509,7 @@ async function deleteFolder(id) {
   const msg = f.note_count
     ? `Delete “${f.name}”? Its ${f.note_count} ${f.note_count === 1 ? 'note' : 'notes'} will move to Recently Deleted.`
     : `Delete “${f.name}”?`;
-  if (!confirm(msg)) return;
+  if (!(await ask(msg))) return;
   await store.deleteFolder(id);
   if (state.scope.kind === 'folder' && state.scope.value === id) state.scope = { kind: 'folder', value: 'notes' };
   state.current = null;
@@ -536,7 +573,9 @@ function wire() {
   els.noteList.addEventListener('click', (e) => {
     if (e.target.id === 'empty-trash') return;
     const row = e.target.closest('[data-id]');
-    if (row) selectNote(row.dataset.id);
+    if (!row) return;
+    selectNote(row.dataset.id);
+    if (phone.matches) setPane('editor');
   });
   els.noteList.addEventListener('dblclick', (e) => {
     const card = e.target.closest('.card');
@@ -561,7 +600,7 @@ function wire() {
   });
   els.listHeading.addEventListener('click', async (e) => {
     if (e.target.id !== 'empty-trash') return;
-    if (!confirm('Permanently delete all notes in Recently Deleted? This can’t be undone.')) return;
+    if (!(await ask('Permanently delete all notes in Recently Deleted? This can’t be undone.', 'Delete All'))) return;
     await store.emptyTrash();
     state.current = null;
     await refreshSidebar();
@@ -611,6 +650,13 @@ function wire() {
   });
 
   $('compose').addEventListener('click', newNote);
+  $('back-folders').addEventListener('click', () => (phone.matches ? setPane('folders') : showFolders(true)));
+  $('back-list').addEventListener('click', async () => { await leaveCurrent(); state.current = null; state.selectedId = null; setPane('list'); renderList(); });
+  els.scrim.addEventListener('click', () => showFolders(false));
+  // Folder taps on a narrow screen close the slide-over panel.
+  els.sidebar = $('sidebar');
+  els.sidebar.addEventListener('click', (e) => { if (e.target.closest('.folder-row, .tag-pill') && compact.matches && !phone.matches) showFolders(false); });
+  compact.addEventListener('change', () => showFolders(false));
   $('delete-note').addEventListener('click', () => trashNote());
   $('pin').addEventListener('click', () => togglePin());
   $('checklist').addEventListener('click', () => toggleList('checklist'));
@@ -636,15 +682,19 @@ function wire() {
   });
 
   let searchTimer;
-  els.search.addEventListener('input', () => {
+  const onSearch = (e) => {
+    const value = e.target.value;
+    els.search.value = els.searchMobile.value = value;
     clearTimeout(searchTimer);
     searchTimer = setTimeout(async () => {
       await flushSave();
-      state.query = els.search.value.trim();
+      state.query = value.trim();
       renderSidebar();
       await refreshList({ keepSelection: false });
     }, 150);
-  });
+  };
+  els.search.addEventListener('input', onSearch);
+  els.searchMobile.addEventListener('input', onSearch);
   els.search.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { els.search.value = ''; els.search.dispatchEvent(new Event('input')); els.noteList.focus(); }
     if (e.key === 'ArrowDown') { e.preventDefault(); els.noteList.focus(); }
@@ -688,6 +738,7 @@ async function start() {
   wire();
   let view = 'list';
   try { view = localStorage.getItem('margin-view') || 'list'; } catch { /* optional */ }
+  setPane(phone.matches ? 'list' : 'editor');
   await refreshSidebar();
   setView(view);
   await refreshList({ keepSelection: false });

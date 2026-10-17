@@ -14,6 +14,7 @@ const P = {
   search: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>',
   plusCircle: '<circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/>',
   tag: '<path d="M3.5 12.2V5a1.5 1.5 0 0 1 1.5-1.5h7.2L20.5 12 12 20.5z"/><circle cx="8" cy="8" r="1.3"/>',
+  back: '<path d="M15 5l-7 7 7 7"/>',
   sharedFolder: '<path d="M3 7.5a2 2 0 0 1 2-2h4l2 2.2h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
 };
 

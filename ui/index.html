@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Margin</title>
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="app.js"></script>
@@ -23,6 +23,7 @@
 
     <section class="list-pane" id="list-pane" aria-label="Notes">
       <header class="toolbar list-toolbar">
+        <button id="back-folders" class="tool back" title="Folders" data-icon="back"></button>
         <div class="segmented" role="group" aria-label="View">
           <button id="view-list" class="seg active" title="View as List" data-icon="list"></button>
           <button id="view-gallery" class="seg" title="View as Gallery" data-icon="grid"></button>
@@ -30,11 +31,16 @@
         <button id="delete-note" class="tool" title="Delete" data-icon="trash"></button>
       </header>
       <div class="list-heading" id="list-heading"></div>
+      <label class="search mobile-search">
+        <span class="icon" data-icon="search"></span>
+        <input id="search-mobile" type="search" placeholder="Search" spellcheck="false" autocomplete="off">
+      </label>
       <div class="note-list" id="note-list" tabindex="0" role="listbox"></div>
     </section>
 
     <main class="editor-pane" id="editor-pane">
       <header class="toolbar editor-toolbar">
+        <button id="back-list" class="tool back" title="Notes" data-icon="back"></button>
         <button id="compose" class="tool" title="New Note (Ctrl+N)" data-icon="compose"></button>
         <span class="divider"></span>
         <button id="format" class="tool" title="Text Styles" data-icon="format"></button>
@@ -42,7 +48,7 @@
         <button id="table" class="tool" title="Table (Ctrl+Alt+T)" data-icon="table"></button>
         <span class="spacer"></span>
         <button id="pin" class="tool" title="Pin Note" data-icon="pin"></button>
-        <label class="search">
+        <label class="search desktop-search">
           <span class="icon" data-icon="search"></span>
           <input id="search" type="search" placeholder="Search" spellcheck="false" autocomplete="off">
         </label>
@@ -78,5 +84,16 @@
   </div>
 
   <div class="menu" id="context-menu" hidden role="menu"></div>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="dialog-backdrop" id="dialog" hidden>
+    <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="dialog-text">
+      <p id="dialog-text"></p>
+      <div class="dialog-buttons">
+        <button id="dialog-cancel">Cancel</button>
+        <button id="dialog-ok" class="danger">Delete</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
